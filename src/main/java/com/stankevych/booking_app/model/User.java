@@ -1,11 +1,18 @@
 package com.stankevych.booking_app.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.ToString;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString

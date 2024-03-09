@@ -1,16 +1,29 @@
 package com.stankevych.booking_app.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.ToString;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.ToString;
 
+@Entity
+@Table(name = "accommodations")
 @Getter
 @ToString
-@Entity(name = "accommodations")
 public class Accommodation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +41,7 @@ public class Accommodation {
 
     @ElementCollection(targetClass = String.class)
     @CollectionTable(name = "amenities", joinColumns = @JoinColumn(name = "accommodation_id", nullable = false),
-    foreignKey = @ForeignKey(name = "accommodations_amenities_fk"))
+            foreignKey = @ForeignKey(name = "accommodations_amenities_fk"))
     @Column(nullable = false)
     private List<String> amenities = new ArrayList<>();
 
@@ -46,3 +59,4 @@ public class Accommodation {
         HOUSE, APARTMENT, CONDO, VACATION_HOME
     }
 }
+
