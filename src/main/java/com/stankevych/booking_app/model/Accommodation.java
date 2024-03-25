@@ -15,15 +15,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Table(name = "accommodations")
 @Getter
-@ToString
+@Setter
+@ToString(exclude = "bookings")
 public class Accommodation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,12 +54,40 @@ public class Accommodation {
     @Column(nullable = false)
     private Integer availability;
 
-    @OneToMany(mappedBy = "accommodation", cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+    @OneToMany(mappedBy = "accommodation", cascade = {CascadeType.MERGE, CascadeType.REMOVE},
             orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
 
-    private enum Type {
-        HOUSE, APARTMENT, CONDO, VACATION_HOME
+    public boolean isAvailableOnDates(LocalDate from, LocalDate to) {
+        return countBookingOnDates(from, to)
+                < availability;
+    }
+
+    public void addBooking(Booking booking) {
+        booking.setAccommodation(this);
+        bookings.add(booking);
+    }
+
+    private int countBookingOnDates(LocalDate from, LocalDate to) {
+        return (int) bookings.stream()
+                .filter(b -> b.getCheckInDate().isBefore(to) &&
+                        b.getCheckOutDate().isAfter(from))
+                .count();
+    }
+
+    @Getter
+    public enum Type {
+        HOUSE("House"),
+        APARTMENT("Apartment"),
+        CONDO("Condo"),
+        VACATION_HOME("Vacation home");
+
+        private String typeName;
+
+        Type(String typeName) {
+            this.typeName = typeName;
+        }
+
     }
 }
 

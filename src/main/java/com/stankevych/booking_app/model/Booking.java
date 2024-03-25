@@ -1,5 +1,6 @@
 package com.stankevych.booking_app.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,14 +12,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Table(name = "bookings")
 @Getter
+@Setter
 @ToString
 public class Booking {
     @Id
@@ -41,11 +45,14 @@ public class Booking {
     foreignKey = @ForeignKey(name = "bookings_users_fk"))
     private User user;
 
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.REMOVE)
+    private Payment payment;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    private Status status = Status.PENDING;
 
-    private enum Status {
+    public enum Status {
         PENDING, CONFIRMED, CANCELED, EXPIRED
     }
 }
