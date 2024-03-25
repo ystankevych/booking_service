@@ -28,15 +28,18 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto createBooking(User user, CreateBookingRequestDto requestDto) {
-        var accommodation = accommodationRepository.findById(requestDto.accommodationId())
+        var accommodation = accommodationRepository
+                .findById(requestDto.accommodationId())
                 .orElseThrow(() -> new EntityNotFoundException("""
-                        No such accommodation with id: %s""".formatted(requestDto.accommodationId())));
+                        No such accommodation with id: %s"""
+                        .formatted(requestDto.accommodationId())));
+
         checkAccommodationAvailability(accommodation,
                 requestDto.checkInDate(), requestDto.checkOutDate());
         checkPendingBooking(user.getId(), Booking.Status.PENDING);
-        var booking = bookingMapper.toBooking(requestDto, user);
-        accommodation.addBooking(booking);
-        accommodationRepository.save(accommodation);
+
+        var booking = bookingMapper.toBooking(requestDto, accommodation, user);
+        bookingRepository.save(booking);
         return bookingMapper.toDto(booking);
     }
 
@@ -54,8 +57,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteBooking(Long userId, Long bookingId) {
-        var booking = bookingRepository.findByIdAndUserIdAndStatusIs(bookingId,
-                userId, Booking.Status.PENDING)
+        var booking = bookingRepository
+                .findByIdAndUserIdAndStatusIs(bookingId,
+                        userId, Booking.Status.PENDING)
                 .orElseThrow(() -> new EntityNotFoundException("""
                         There is no unpaid booking with id '%d' 
                         for user with id '%d'.""".formatted(bookingId, userId)));
@@ -64,7 +68,9 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkAccommodationAvailability(Accommodation accommodation,
                                                 LocalDate from, LocalDate to) {
-        if (!accommodation.isAvailableOnDates(from, to)) {
+        int count = bookingRepository.countBookingsOnDate(accommodation.getId(),
+                from, to);
+        if (count >= accommodation.getAvailability()) {
             throw new BookingException("""
                     No available accommodation with id '%d' on dates '%s-%s'"""
                     .formatted(accommodation.getId(), from, to));

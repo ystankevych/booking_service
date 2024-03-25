@@ -15,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -54,26 +53,9 @@ public class Accommodation {
     @Column(nullable = false)
     private Integer availability;
 
-    @OneToMany(mappedBy = "accommodation", cascade = {CascadeType.MERGE, CascadeType.REMOVE},
+    @OneToMany(mappedBy = "accommodation", cascade = CascadeType.REMOVE,
             orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
-
-    public boolean isAvailableOnDates(LocalDate from, LocalDate to) {
-        return countBookingOnDates(from, to)
-                < availability;
-    }
-
-    public void addBooking(Booking booking) {
-        booking.setAccommodation(this);
-        bookings.add(booking);
-    }
-
-    private int countBookingOnDates(LocalDate from, LocalDate to) {
-        return (int) bookings.stream()
-                .filter(b -> b.getCheckInDate().isBefore(to) &&
-                        b.getCheckOutDate().isAfter(from))
-                .count();
-    }
 
     @Getter
     public enum Type {

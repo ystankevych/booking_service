@@ -9,8 +9,12 @@ import com.stankevych.booking_app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/users")
@@ -26,12 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CUSTOMER')")
     public UserResponseDto getMyProfileInfo(Authentication authentication) {
         var user = (User) authentication.getPrincipal();
         return userService.getMyProfileInfo(user);
     }
 
     @PutMapping("/me")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CUSTOMER')")
     public UserResponseDto updateMyProfile(@RequestBody UpdateUserRequestDto requestDto,
                                            Authentication authentication) {
         var user = (User) authentication.getPrincipal();

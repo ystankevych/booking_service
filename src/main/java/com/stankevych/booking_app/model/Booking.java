@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -51,6 +52,13 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.PENDING;
+
+    @Column(name = "unpaid_term", nullable = false)
+    private LocalDateTime unpaidTerm;
+
+    {
+        unpaidTerm = LocalDateTime.now().plusMinutes(2);
+    }
 
     public enum Status {
         PENDING, CONFIRMED, CANCELED, EXPIRED

@@ -1,20 +1,19 @@
 package com.stankevych.booking_app.service.impl;
 
+import static com.stripe.param.checkout.SessionCreateParams.LineItem;
+import static com.stripe.param.checkout.SessionCreateParams.Mode;
+import static com.stripe.param.checkout.SessionCreateParams.builder;
+
 import com.stankevych.booking_app.exception.PaymentException;
 import com.stankevych.booking_app.model.Payment;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionExpireParams;
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import static com.stripe.param.checkout.SessionCreateParams.*;
 
 @Service
 public class StripeServiceImpl {
@@ -37,7 +36,6 @@ public class StripeServiceImpl {
     public Session createSession(Payment payment) {
         var sessionParams = builder()
                 .setMode(Mode.PAYMENT)
-                .setExpiresAt(LocalDateTime.now().plusMinutes(31).toEpochSecond(ZoneOffset.UTC))
                 .setSuccessUrl(constructSessionUri(SUCCESS_PATH))
                 .setCancelUrl(constructSessionUri(CANCEL_PATH))
                 .addLineItem(LineItem.builder()
