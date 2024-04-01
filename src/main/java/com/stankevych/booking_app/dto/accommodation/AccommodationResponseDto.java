@@ -10,5 +10,5 @@ public record AccommodationResponseDto(
         String size,
         List<String> amenities,
         BigDecimal dailyRate,
-        Integer availability
-) {}
+        Integer availability) {
+}

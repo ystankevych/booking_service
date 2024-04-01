@@ -30,7 +30,7 @@ public class Payment {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(32)")
     private Status status = Status.PENDING;
 
     @MapsId

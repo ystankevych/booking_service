@@ -8,5 +8,5 @@ public record BookingResponseDto(
         LocalDate checkOutDate,
         Long accommodationId,
         Long userId,
-        String status
-) {}
+        String status) {
+}

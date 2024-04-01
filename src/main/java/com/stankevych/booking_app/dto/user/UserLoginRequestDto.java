@@ -1,4 +1,12 @@
 package com.stankevych.booking_app.dto.user;
 
-public record UserLoginRequestDto(String email, String password) {
+import com.stankevych.booking_app.validation.email.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record UserLoginRequestDto(
+        @Email
+        String email,
+
+        @NotBlank(message = "Password must not be null or empty")
+        String password) {
 }

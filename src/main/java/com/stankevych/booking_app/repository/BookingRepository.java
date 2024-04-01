@@ -27,5 +27,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(attributePaths = "payment")
     Optional<Booking> findByIdAndUserIdAndStatusIs(Long id, Long userId, Booking.Status status);
 
-    List<Booking> findAllByUnpaidTermIsLessThanEqual(LocalDateTime localDateTime);
+    @EntityGraph(attributePaths = "payment")
+    Optional<Booking> findByIdAndUserIdAndStatusIsAndUnpaidTermAfter(Long id,
+                                                                     Long userId,
+                                                                     Booking.Status status,
+                                                                     LocalDateTime now);
+
+    List<Booking> findAllByUnpaidTermIsLessThanEqualAndStatusIs(LocalDateTime localDateTime,
+                                                                Booking.Status status);
 }

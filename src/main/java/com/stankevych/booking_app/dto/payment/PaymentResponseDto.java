@@ -1,7 +1,6 @@
 package com.stankevych.booking_app.dto.payment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.math.BigDecimal;
 
 public record PaymentResponseDto(
@@ -9,5 +8,5 @@ public record PaymentResponseDto(
         Long id,
         String status,
         BigDecimal amountToPay,
-        String sessionUrl
-) {}
+        String sessionUrl) {
+}

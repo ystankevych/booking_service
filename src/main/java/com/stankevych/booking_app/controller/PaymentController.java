@@ -1,5 +1,6 @@
 package com.stankevych.booking_app.controller;
 
+import com.stankevych.booking_app.dto.payment.CanceledPaymentResponseDto;
 import com.stankevych.booking_app.dto.payment.PaymentDtoWithoutSession;
 import com.stankevych.booking_app.dto.payment.PaymentRequestDto;
 import com.stankevych.booking_app.dto.payment.PaymentResponseDto;
@@ -39,7 +40,7 @@ public class PaymentController {
 
     @GetMapping("/cancel")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public PaymentDtoWithoutSession cancelPayment(@RequestParam String sessionId) {
+    public CanceledPaymentResponseDto cancelPayment(@RequestParam String sessionId) {
         return paymentService.cancelPayment(sessionId);
     }
 

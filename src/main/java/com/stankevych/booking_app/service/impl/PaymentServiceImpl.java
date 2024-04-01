@@ -3,6 +3,7 @@ package com.stankevych.booking_app.service.impl;
 import static com.stankevych.booking_app.model.Payment.Status.PAID;
 import static com.stankevych.booking_app.model.Payment.Status.PENDING;
 
+import com.stankevych.booking_app.dto.payment.CanceledPaymentResponseDto;
 import com.stankevych.booking_app.dto.payment.PaymentDtoWithoutSession;
 import com.stankevych.booking_app.dto.payment.PaymentResponseDto;
 import com.stankevych.booking_app.exception.EntityNotFoundException;
@@ -16,6 +17,8 @@ import com.stankevych.booking_app.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,12 +33,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponseDto createPayment(Long bookingId, Long userId) {
         var booking = bookingRepository
-                .findByIdAndUserIdAndStatusIs(bookingId, userId, Booking.Status.PENDING)
+                .findByIdAndUserIdAndStatusIsAndUnpaidTermAfter(bookingId, userId,
+                        Booking.Status.PENDING, LocalDateTime.now())
                 .orElseThrow(() -> new EntityNotFoundException("""
                         No unpaid booking with id '%d" for user with id '%d' found"""
                         .formatted(bookingId, userId)));
 
-        var payment = createPaymentForBooking(booking);
+        var payment = new Payment(booking);
         var session = stripeService.createSession(payment);
         payment.setSessionId(session.getId());
         payment.setSessionUrl(session.getUrl());
@@ -64,27 +68,22 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentDtoWithoutSession cancelPayment(String sessionId) {
+    public CanceledPaymentResponseDto cancelPayment(String sessionId) {
         var payment = paymentRepository
                 .findBySessionIdAndStatusIs(sessionId, PENDING)
                 .orElseThrow(() -> new PaymentException("""
                         No unpaid payment with session id '%s' found"""
                         .formatted(sessionId)));
         stripeService.expireSession(sessionId);
-        return paymentMapper
-                .toDtoWithoutSession(payment);
+        var canceledPaymentResponse = new CanceledPaymentResponseDto(payment.getBooking().getId(),
+                payment.getBooking().getUnpaidTerm());
+        paymentRepository.delete(payment);
+        return canceledPaymentResponse;
     }
 
     private void checkSessionCompletion(String sessionId) {
         if (!stripeService.isSessionPaid(sessionId)) {
             throw new PaymentException("Unpaid session found");
         }
-    }
-
-    private Payment createPaymentForBooking(Booking booking) {
-        if (booking.getPayment() != null) {
-            return booking.getPayment();
-        }
-        return new Payment(booking);
     }
 }

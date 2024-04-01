@@ -33,7 +33,7 @@ public class Booking {
     @Column(name = "check_in_date", nullable = false)
     private LocalDate checkInDate;
 
-    @Column(name = "check_ot_date", nullable = false)
+    @Column(name = "check_out_date", nullable = false)
     private LocalDate checkOutDate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -50,14 +50,14 @@ public class Booking {
     private Payment payment;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(32)")
     private Status status = Status.PENDING;
 
     @Column(name = "unpaid_term", nullable = false)
     private LocalDateTime unpaidTerm;
 
     {
-        unpaidTerm = LocalDateTime.now().plusMinutes(2);
+        unpaidTerm = LocalDateTime.now().plusMinutes(1);
     }
 
     public enum Status {

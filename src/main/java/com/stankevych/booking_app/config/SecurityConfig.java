@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**",
                                 "/accommodations/**")
                         .permitAll()
+                        .requestMatchers("/health").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated()
                 )

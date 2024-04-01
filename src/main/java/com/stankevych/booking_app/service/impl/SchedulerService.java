@@ -13,14 +13,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SchedulerService {
     private final BookingRepository bookingRepository;
+    private final StripeServiceImpl stripeService;
 
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0 */2 * * * *")
     private void cancelUnpaidBooking() {
         List<Booking> list = bookingRepository
-                .findAllByUnpaidTermIsLessThanEqual(LocalDateTime.now())
+                .findAllByUnpaidTermIsLessThanEqualAndStatusIs(LocalDateTime.now(), Booking.Status.PENDING)
                 .stream()
-                .peek(b -> b.setStatus(Booking.Status.CANCELED))
+                .peek(b -> {
+                    if (b.getPayment() != null) {
+                        stripeService.expireSession(b.getPayment().getSessionId());
+                    }
+                })
                 .toList();
-        bookingRepository.saveAll(list);
+        bookingRepository.deleteAll(list);
     }
 }

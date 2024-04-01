@@ -4,5 +4,5 @@ import java.util.Set;
 
 public record UserWithRolesResponseDto(
         String email,
-        Set<Long> rolesId
-) {}
+        Set<Long> rolesId) {
+}

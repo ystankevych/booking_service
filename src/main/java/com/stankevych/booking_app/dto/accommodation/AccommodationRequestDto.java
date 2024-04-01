@@ -23,5 +23,5 @@ public record AccommodationRequestDto(
 
         @Positive(message = "Availability must be positive")
         @NotNull(message = "Availability must not be null")
-        Integer availability
-) {}
+        Integer availability) {
+}
