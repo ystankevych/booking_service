@@ -3,12 +3,14 @@ package com.stankevych.booking_app.mapper;
 import com.stankevych.booking_app.config.MapperConfig;
 import com.stankevych.booking_app.dto.booking.BookingResponseDto;
 import com.stankevych.booking_app.dto.booking.CreateBookingRequestDto;
+import com.stankevych.booking_app.dto.booking.UpdateBookingRequestDto;
 import com.stankevych.booking_app.model.Accommodation;
 import com.stankevych.booking_app.model.Booking;
 import com.stankevych.booking_app.model.User;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(config = MapperConfig.class)
 public interface BookingMapper {
@@ -24,4 +26,6 @@ public interface BookingMapper {
     BookingResponseDto toDto(Booking booking);
 
     List<BookingResponseDto> toDtoList(List<Booking> bookings);
+
+    void updateBooking(UpdateBookingRequestDto requestDto, @MappingTarget Booking booking);
 }

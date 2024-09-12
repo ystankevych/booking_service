@@ -11,6 +11,6 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, Lo
     @EntityGraph(attributePaths = "amenities")
     Page<Accommodation> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = "amenities")
+    @EntityGraph(attributePaths = {"amenities", "bookings"})
     Optional<Accommodation> findById(Long id);
 }

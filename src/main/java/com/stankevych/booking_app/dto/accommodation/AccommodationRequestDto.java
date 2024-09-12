@@ -15,6 +15,8 @@ public record AccommodationRequestDto(
 
         @NotBlank(message = "Size must not be null or empty")
         String size,
+
+        @NotNull(message = "Amenities must not be null")
         List<String> amenities,
 
         @Positive(message = "Daily rate must be positive")

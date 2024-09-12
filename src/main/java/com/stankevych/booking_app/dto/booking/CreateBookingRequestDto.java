@@ -16,7 +16,7 @@ public record CreateBookingRequestDto(
         @Future(message = "Check-out date must be in the future")
         LocalDate checkOutDate,
 
-        @Positive(message = "Accommodation id must be positive")
-        @NotNull(message = "Accommodation id must not be null")
+        @Positive(message = "Accommodation ID must be positive")
+        @NotNull(message = "Accommodation ID must not be null")
         Long accommodationId) {
 }

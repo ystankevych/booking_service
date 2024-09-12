@@ -6,7 +6,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import java.time.LocalDate;
 
-public class DateValidator implements ConstraintValidator<Date, LocalDate> {
+public class DateValidator implements ConstraintValidator<Date, Object> {
     private String fromDate;
     private String toDate;
     @Override
@@ -16,7 +16,7 @@ public class DateValidator implements ConstraintValidator<Date, LocalDate> {
     }
 
     @Override
-    public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
         var from = new BeanWrapperImpl(value).getPropertyValue(fromDate);
         var to = new BeanWrapperImpl(value).getPropertyValue(toDate);
         return from != null && to != null

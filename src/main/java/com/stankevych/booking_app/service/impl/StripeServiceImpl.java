@@ -42,10 +42,10 @@ public class StripeServiceImpl {
                         .setQuantity(DEFAULT_QUANTITY)
                         .setPriceData(LineItem.PriceData.builder()
                                 .setCurrency(CURRENCY)
-                                .setUnitAmountDecimal(unitAmountInCentToDollars(payment))
+                                .setUnitAmountDecimal(StripeUtil.unitAmountInCentToDollars(payment))
                                 .setProductData(LineItem.PriceData.ProductData.builder()
-                                        .setName(createProductDataName(payment))
-                                        .setDescription(createProductDescription(payment))
+                                        .setName(StripeUtil.createProductDataName(payment))
+                                        .setDescription(StripeUtil.createProductDescription(payment))
                                         .build())
                                 .build())
                         .build())
@@ -65,30 +65,6 @@ public class StripeServiceImpl {
                 .queryParam(QUERY_PARAM_NAME, QUERY_PARAM_VALUE)
                 .build()
                 .toUriString();
-    }
-
-    private BigDecimal unitAmountInCentToDollars(Payment payment) {
-        return payment.getAmountToPay()
-                .multiply(BigDecimal.valueOf(100L));
-    }
-
-    private String createProductDataName(Payment payment) {
-        return "Booking %s"
-                .formatted(payment.getBooking()
-                        .getAccommodation()
-                        .getType()
-                        .getTypeName());
-    }
-
-    private String createProductDescription(Payment payment) {
-        return """
-                Check in date: %s%n
-                Check out date: %s%n
-                Amenities included: %s"""
-                .formatted(payment.getBooking().getCheckInDate(),
-                        payment.getBooking().getCheckOutDate(),
-                        String.join(", ", payment.getBooking()
-                                .getAccommodation().getAmenities()));
     }
 
     private Session retrieveSession(String sessionId) {
@@ -111,6 +87,32 @@ public class StripeServiceImpl {
                     .expire(SessionExpireParams.builder().build());
         } catch (StripeException e) {
             throw new PaymentException("Failed to expire Stripe session");
+        }
+    }
+
+    private static class StripeUtil {
+        private static String createProductDescription(Payment payment) {
+            return """
+                Check in date: %s%n
+                Check out date: %s%n
+                Amenities included: %s"""
+                    .formatted(payment.getBooking().getCheckInDate(),
+                            payment.getBooking().getCheckOutDate(),
+                            String.join(", ", payment.getBooking()
+                                    .getAccommodation().getAmenities()));
+        }
+
+        private static String createProductDataName(Payment payment) {
+            return "Booking %s"
+                    .formatted(payment.getBooking()
+                            .getAccommodation()
+                            .getType()
+                            .getTypeName());
+        }
+
+        private static BigDecimal unitAmountInCentToDollars(Payment payment) {
+            return payment.getAmountToPay()
+                    .multiply(BigDecimal.valueOf(100L));
         }
     }
 }

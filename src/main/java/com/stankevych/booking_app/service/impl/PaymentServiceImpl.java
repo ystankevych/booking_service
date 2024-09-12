@@ -14,12 +14,11 @@ import com.stankevych.booking_app.model.Payment;
 import com.stankevych.booking_app.repository.BookingRepository;
 import com.stankevych.booking_app.repository.PaymentRepository;
 import com.stankevych.booking_app.service.PaymentService;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,11 +73,16 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new PaymentException("""
                         No unpaid payment with session id '%s' found"""
                         .formatted(sessionId)));
-        stripeService.expireSession(sessionId);
+        expirePaymentSession(payment);
         var canceledPaymentResponse = new CanceledPaymentResponseDto(payment.getBooking().getId(),
                 payment.getBooking().getUnpaidTerm());
         paymentRepository.delete(payment);
         return canceledPaymentResponse;
+    }
+
+    @Override
+    public void expirePaymentSession(Payment payment) {
+        stripeService.expireSession(payment.getSessionId());
     }
 
     private void checkSessionCompletion(String sessionId) {

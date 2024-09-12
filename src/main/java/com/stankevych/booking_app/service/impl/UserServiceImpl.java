@@ -1,6 +1,10 @@
 package com.stankevych.booking_app.service.impl;
 
-import com.stankevych.booking_app.dto.user.*;
+import com.stankevych.booking_app.dto.user.UpdateUserByRoleIdDto;
+import com.stankevych.booking_app.dto.user.UpdateUserRequestDto;
+import com.stankevych.booking_app.dto.user.UserRegistrationRequestDto;
+import com.stankevych.booking_app.dto.user.UserResponseDto;
+import com.stankevych.booking_app.dto.user.UserWithRolesResponseDto;
 import com.stankevych.booking_app.exception.EntityNotFoundException;
 import com.stankevych.booking_app.exception.RegistrationException;
 import com.stankevych.booking_app.mapper.UserMapper;
@@ -10,13 +14,12 @@ import com.stankevych.booking_app.repository.RoleRepository;
 import com.stankevych.booking_app.repository.UserRepository;
 import com.stankevych.booking_app.service.UserService;
 import jakarta.annotation.PostConstruct;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

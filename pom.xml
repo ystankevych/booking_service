@@ -20,7 +20,8 @@
         <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
         <jjwt.version>0.12.5</jjwt.version>
         <stripe.version>24.21.0</stripe.version>
-        <liquibase.version>4.26.0</liquibase.version>
+        <telegrambots.version>6.5.0</telegrambots.version>
+        <spring.mail.version>3.3.0</spring.mail.version>
     </properties>
     <dependencies>
         <dependency>
@@ -100,6 +101,18 @@
             <version>${stripe.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>${telegrambots.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>${spring.mail.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -116,6 +129,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

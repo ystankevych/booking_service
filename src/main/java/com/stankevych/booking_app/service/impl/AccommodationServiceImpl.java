@@ -4,19 +4,23 @@ import com.stankevych.booking_app.dto.accommodation.AccommodationRequestDto;
 import com.stankevych.booking_app.dto.accommodation.AccommodationResponseDto;
 import com.stankevych.booking_app.exception.EntityNotFoundException;
 import com.stankevych.booking_app.mapper.AccommodationMapper;
+import com.stankevych.booking_app.model.Booking;
+import com.stankevych.booking_app.model.Payment;
 import com.stankevych.booking_app.repository.AccommodationRepository;
 import com.stankevych.booking_app.service.AccommodationService;
+import com.stankevych.booking_app.service.PaymentService;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AccommodationServiceImpl implements AccommodationService {
     private final AccommodationRepository repository;
     private final AccommodationMapper mapper;
+    private final PaymentService paymentService;
 
     @Override
     public AccommodationResponseDto createAccommodation(AccommodationRequestDto requestDto) {
@@ -47,6 +51,14 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void deleteAccommodation(Long id) {
-        repository.deleteById(id);
+        repository.findById(id)
+                .ifPresent(accommodation -> {
+                    accommodation.getBookings().stream()
+                            .map(Booking::getPayment)
+                            .filter(Objects::nonNull)
+                            .filter(p -> p.getStatus() == Payment.Status.PENDING)
+                            .forEach(paymentService::expirePaymentSession);
+                    repository.delete(accommodation);
+                });
     }
 }

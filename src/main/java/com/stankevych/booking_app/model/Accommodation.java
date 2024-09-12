@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,7 +26,8 @@ import lombok.ToString;
 @Table(name = "accommodations")
 @Getter
 @Setter
-@ToString(exclude = "bookings")
+@EqualsAndHashCode(exclude = {"amenities", "bookings"})
+@ToString(exclude = {"amenities", "bookings"})
 public class Accommodation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,7 +71,5 @@ public class Accommodation {
         Type(String typeName) {
             this.typeName = typeName;
         }
-
     }
 }
-

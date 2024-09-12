@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-telegramusers-table
+      author: Olena Stankevych
+      changes:
+        - createTable:
+            tableName: telegram_users
+            columns:
+              - column:
+                  name: id
+                  type: varchar(64)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: telegram_users_fk
+                    references: users(id)
+              - column:
+                  name: is_active
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: validation_code
+                  type: varchar(4)
+
+

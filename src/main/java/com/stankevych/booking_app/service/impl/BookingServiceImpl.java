@@ -2,21 +2,24 @@ package com.stankevych.booking_app.service.impl;
 
 import com.stankevych.booking_app.dto.booking.BookingResponseDto;
 import com.stankevych.booking_app.dto.booking.CreateBookingRequestDto;
+import com.stankevych.booking_app.dto.booking.UpdateBookingRequestDto;
 import com.stankevych.booking_app.exception.BookingException;
 import com.stankevych.booking_app.exception.EntityNotFoundException;
 import com.stankevych.booking_app.mapper.BookingMapper;
 import com.stankevych.booking_app.model.Accommodation;
 import com.stankevych.booking_app.model.Booking;
+import com.stankevych.booking_app.model.Payment;
 import com.stankevych.booking_app.model.User;
 import com.stankevych.booking_app.repository.AccommodationRepository;
 import com.stankevych.booking_app.repository.BookingRepository;
 import com.stankevych.booking_app.service.BookingService;
+import com.stankevych.booking_app.service.PaymentService;
+import com.stankevych.booking_app.service.TelegramNotificationService;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final AccommodationRepository accommodationRepository;
     private final BookingMapper bookingMapper;
+    private final PaymentService paymentService;
+    private final TelegramNotificationService notificationService;
 
     @Override
     @Transactional
@@ -40,6 +45,28 @@ public class BookingServiceImpl implements BookingService {
 
         var booking = bookingMapper.toBooking(requestDto, accommodation, user);
         bookingRepository.save(booking);
+        notificationService.notifyAboutCreatedBooking(booking);
+        return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponseDto updateBooking(User user, Long id, UpdateBookingRequestDto requestDto) {
+        var booking = bookingRepository
+                .findByIdAndUserIdAndStatusIs(id, user.getId(), Booking.Status.PENDING)
+                .orElseThrow(() -> new EntityNotFoundException("""
+                        No such booking with id '%s' for user with id '%s'"""
+                        .formatted(id, user.getId())));
+
+        checkAccommodationAvailability(booking.getAccommodation(),
+                requestDto.checkInDate(), requestDto.checkOutDate());
+
+        if (booking.getPayment() != null) {
+            paymentService.expirePaymentSession(booking.getPayment());
+            booking.setPayment(null);
+        }
+
+        bookingMapper.updateBooking(requestDto, booking);
         return bookingMapper.toDto(booking);
     }
 
@@ -57,13 +84,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteBooking(Long userId, Long bookingId) {
-        var booking = bookingRepository
-                .findByIdAndUserIdAndStatusIs(bookingId,
-                        userId, Booking.Status.PENDING)
-                .orElseThrow(() -> new EntityNotFoundException("""
-                        There is no unpaid booking with id '%d' 
-                        for user with id '%d'.""".formatted(bookingId, userId)));
-        bookingRepository.delete(booking);
+        bookingRepository.findByIdAndUserIdAndStatusIs(bookingId, userId, Booking.Status.PENDING)
+                .ifPresent(b -> {
+                    if (b.getPayment() != null) {
+                        paymentService.expirePaymentSession(b.getPayment());
+                    }
+                    bookingRepository.delete(b);
+                });
     }
 
     private void checkAccommodationAvailability(Accommodation accommodation,

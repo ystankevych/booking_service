@@ -38,15 +38,17 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "accommodation_id", nullable = false,
-    foreignKey = @ForeignKey(name = "bookings_accommodations_fk"))
+            foreignKey = @ForeignKey(name = "bookings_accommodations_fk"))
     private Accommodation accommodation;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false,
-    foreignKey = @ForeignKey(name = "bookings_users_fk"))
+            foreignKey = @ForeignKey(name = "bookings_users_fk"))
     private User user;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "booking",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
     private Payment payment;
 
     @Enumerated(EnumType.STRING)
@@ -57,7 +59,7 @@ public class Booking {
     private LocalDateTime unpaidTerm;
 
     {
-        unpaidTerm = LocalDateTime.now().plusMinutes(1);
+        unpaidTerm = LocalDateTime.now().plusMinutes(30);
     }
 
     public enum Status {
