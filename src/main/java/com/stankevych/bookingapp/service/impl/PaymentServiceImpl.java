@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
         checkSessionCompletion(sessionId);
         var payment = paymentRepository
                 .findBySessionIdAndStatusIs(sessionId, PENDING)
-                .orElseThrow(() -> new PaymentException("""
+                .orElseThrow(() -> new EntityNotFoundException("""
                         No unpaid payment with session id '%s' found"""
                         .formatted(sessionId)));
         payment.setStatus(PAID);
@@ -70,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
     public CanceledPaymentResponseDto cancelPayment(String sessionId) {
         var payment = paymentRepository
                 .findBySessionIdAndStatusIs(sessionId, PENDING)
-                .orElseThrow(() -> new PaymentException("""
+                .orElseThrow(() -> new EntityNotFoundException("""
                         No unpaid payment with session id '%s' found"""
                         .formatted(sessionId)));
         expirePaymentSession(payment);
