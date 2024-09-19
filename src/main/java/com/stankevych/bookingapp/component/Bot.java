@@ -46,80 +46,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void handleStartCommand(String chatId) {
-        telegramRepository.save(new TelegramUser(chatId));
-        notifyUser("Please, put your Booking service email", chatId);
-    }
-
-    private void handleDeactivateCommand(String chatId) {
-        telegramRepository.save(new TelegramUser(chatId));
-        notifyUser("""
-                Your account is deactivated.
-                To activate it again put /start""", chatId);
-    }
-
-    private void handleMessage(String message, String chatId) {
-        TelegramUser user = telegramRepository.findById(chatId)
-                .orElseGet(() -> new TelegramUser(chatId));
-        if (user.getUser() == null) {
-            sendEmail(message, user);
-        } else {
-            if (check(message, user)) {
-                activate(user);
-                return;
-            }
-            notifyUser("Invalid code", chatId);
-        }
-    }
-
-    private void sendEmail(String email, TelegramUser telegramUser) {
-        var user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            notifyUser("Incorrect user email", telegramUser.getId());
-            return;
-        }
-        String validationCode = generateValidationCode();
-        try {
-            emailService.sendEmail(email, EMAIL_SUBJECT, EMAIL_BODY.formatted(validationCode));
-            telegramUser.setUser(user.get());
-            telegramUser.setValidationCode(validationCode);
-            telegramRepository.save(telegramUser);
-            notifyUser("""
-                    Verification code was sent to your email.
-                    Please, put it below ⬇️""", telegramUser.getId());
-        } catch (Exception e) {
-            notifyUser("""
-                    Can't complete verification.
-                    Please, try again later""", telegramUser.getId());
-        }
-    }
-
-    private void activate(TelegramUser user) {
-        user.setActive(true);
-        telegramRepository.save(user);
-        notifyUser("""
-                ✅ Hi, %s, your account is activated.
-                   In this bot you will get notifications on
-                                🔹 created rentals
-                                🔹 successful payments
-                                🔹 overdue rentals
-                                🔹 notifications if you have any overdue rentals            
-                                We hope you will enjoy your trip!🌎
-                                ❌ To deactivate notifications put /deactivate"""
-                .formatted(user.getUser().getFirstName()), user.getId());
-    }
-
-    private boolean check(String message, TelegramUser user) {
-        return user.getValidationCode().equals(message);
-    }
-
-    private String generateValidationCode() {
-        final int min = 1000;
-        final int max = 10000;
-        return String.valueOf(new Random().nextInt(min, max));
-    }
-
-    public void notifyUser(String message, String chatId) {
+    public void sendMessageToChat(String message, String chatId) {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
                 .text(message)
@@ -134,5 +61,72 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         return botUserName;
+    }
+
+    private void handleStartCommand(String chatId) {
+        telegramRepository.save(new TelegramUser(chatId));
+        sendMessageToChat("Please, put your Booking service email", chatId);
+    }
+
+    private void handleDeactivateCommand(String chatId) {
+        telegramRepository.save(new TelegramUser(chatId));
+        sendMessageToChat("""
+                Your account is deactivated.
+                To activate it again put /start""", chatId);
+    }
+
+    private void handleMessage(String message, String chatId) {
+        TelegramUser user = telegramRepository.findById(chatId)
+                .orElseGet(() -> new TelegramUser(chatId));
+        if (user.getUser() == null) {
+            sendEmail(message, user);
+        } else {
+            if (check(message, user)) {
+                activate(user);
+                return;
+            }
+            sendMessageToChat("Invalid code", chatId);
+        }
+    }
+
+    private void sendEmail(String email, TelegramUser telegramUser) {
+        var user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            sendMessageToChat("Incorrect user email", telegramUser.getId());
+            return;
+        }
+        String validationCode = generateValidationCode();
+        try {
+            emailService.sendEmail(email, EMAIL_SUBJECT, EMAIL_BODY.formatted(validationCode));
+            telegramUser.setUser(user.get());
+            telegramUser.setValidationCode(validationCode);
+            telegramRepository.save(telegramUser);
+            sendMessageToChat("""
+                    Verification code was sent to your email.
+                    Please, put it below ⬇️""", telegramUser.getId());
+        } catch (Exception e) {
+            sendMessageToChat("""
+                    Can't complete verification.
+                    Please, try again later""", telegramUser.getId());
+        }
+    }
+
+    private void activate(TelegramUser user) {
+        user.setActive(true);
+        telegramRepository.save(user);
+        sendMessageToChat("""
+                ✅ Hi, %s, your account is activated.
+                ❌ To deactivate notifications put /deactivate"""
+                .formatted(user.getUser().getFirstName()), user.getId());
+    }
+
+    private boolean check(String message, TelegramUser user) {
+        return user.getValidationCode().equals(message);
+    }
+
+    private String generateValidationCode() {
+        final int min = 1000;
+        final int max = 10000;
+        return String.valueOf(new Random().nextInt(min, max));
     }
 }

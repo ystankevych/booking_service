@@ -19,15 +19,15 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmail(String to, String subject, String text) {
-        MimeMessage message = sender.createMimeMessage();
+        MimeMessage mimeMessage = sender.createMimeMessage();
         MimeMessageHelper helper = null;
         try {
-            helper = new MimeMessageHelper(message, true);
+            helper = new MimeMessageHelper(mimeMessage, true);
             helper.setFrom(fromEmail);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(text);
-            sender.send(message);
+            sender.send(mimeMessage);
         } catch (Exception e) {
             throw new EmailNotificationException("Can't send email to the email '%s'"
                     .formatted(to));

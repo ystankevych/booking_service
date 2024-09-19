@@ -65,11 +65,11 @@ public class TelegramNotificationsServiceImpl implements TelegramNotificationSer
 
     private void notifyUser(User user, String message) {
         repository.findByUserIdAndIsActive(user.getId(), true)
-                .ifPresent(tu -> bot.notifyUser(message, tu.getId()));
+                .ifPresent(tu -> bot.sendMessageToChat(message, tu.getId()));
     }
 
     private void notifyAll(String message) {
         repository.findAllByIsActive(true)
-                .forEach(tu -> bot.notifyUser(message, tu.getId()));
+                .forEach(tu -> bot.sendMessageToChat(message, tu.getId()));
     }
 }
